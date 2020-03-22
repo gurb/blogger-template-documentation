@@ -1,27 +1,51 @@
 <script>
-    var numposts = 4;
-    var isList = true;
-    function showrecentposts(json) {
-      for (var i = 0; i < 4; i++) {
+var numposts = 4;
+var isList = true;
+
+function removeHtmlTag(summary,len_summary){
+    if(summary.indexOf("<")!=-1)
+    {
+        var s = summary.split("<");
+        for(var i=0;i<s.length;i++){
+            if(s[i].indexOf(">")!=-1){
+                s[i] = s[i].substring(s[i].indexOf(">")+1,s[i].length);
+            }
+        }
+        summary = s.join("");
+    }
+    len_summary = (len_summary < summary.length-1) ? len_summary : summary.length-2;
+    while(summary.charAt(len_summary-1)!=' ' && summary.indexOf(' ',len_summary)!=-1) len_summary++;
+    summary = summary.substring(0,len_summary-1);
+    return summary+'...';
+}
+
+function showrecentposts(json) {
+    for (var i = 0; i < 4; i++) {
         var entry = json.feed.entry[i];
         var postTitle = entry.title.$t;
         var postSummary = entry.summary.$t;
+        
+        postSummary = removeHtmlTag(postSummary, 300)
+        
         var postUrl;
+        
         if (i == json.feed.entry.length) break;
         for (var k = 0; k < entry.link.length; k++) {
-          if (entry.link[k].rel == "alternate") {
-            postUrl = entry.link[k].href;
-            break;
-          }}
+            if (entry.link[k].rel == "alternate") {
+                postUrl = entry.link[k].href;
+                break;
+            }
+        }
         postTitle = postTitle.link(postUrl);
         if (isList) document.write("<li>");
-        document.write(postTitle + postSummary + "...");}
-        if (isList) document.write("</li>");
+        document.write(postTitle + postSummary + "...");
     }
-    </script>
+    if (isList) document.write("</li>");
+}
 
-<br />
-<ul>
-    <script src="//btdocumentation.blogspot.com/feeds/posts/summary?max-results=900&amp;alt=json-in-script&amp;callback=showrecentposts">
 </script>
-    </ul>
+
+<ul>
+<script src="//btdocumentation.blogspot.com/feeds/posts/summary?max-results=900&amp;alt=json-in-script&amp;callback=showrecentposts">
+</script>
+</ul>
